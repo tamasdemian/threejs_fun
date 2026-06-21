@@ -1,0 +1,11 @@
+const g = new THREE.Group();
+const nodes2D = [[1.4,0,0],[-0.7,1.2124,0],[-0.7,-1.2124,0],[0.7,0,1.2124],[-1.4,0,0],[0.7,0,-1.2124]].map(([x,y,z]) => new THREE.Vector3(x*1.8,y*1.8,z*1.8));
+const nodeGeo = new THREE.SphereGeometry(0.22, 20, 20);
+nodes2D.forEach((p,i)=>{ const m = new THREE.Mesh(nodeGeo, new THREE.MeshPhongMaterial({ color: i<3 ? 0xffc56e : 0xffedd0 })); m.position.copy(p); g.add(m); });
+const edges=[]; for(let i=0;i<3;i++) for(let j=3;j<6;j++) edges.push(nodes2D[i].x,nodes2D[i].y,nodes2D[i].z,nodes2D[j].x,nodes2D[j].y,nodes2D[j].z);
+const eg = new THREE.BufferGeometry(); eg.setAttribute('position', new THREE.Float32BufferAttribute(edges,3)); g.add(new THREE.LineSegments(eg, new THREE.LineBasicMaterial({ color: 0xf8e7c9 })));
+const c1 = Array.from({length:120}, (_,i)=>{ const a=i/120*Math.PI*2; return new THREE.Vector3(Math.cos(a)*1.4*1.8, Math.sin(a)*1.4*1.8, 0); });
+g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(c1), new THREE.LineBasicMaterial({ color: 0xffc56e, transparent: true, opacity: 0.28 })));
+const c2 = Array.from({length:120}, (_,i)=>{ const a=i/120*Math.PI*2; return new THREE.Vector3(Math.cos(a)*1.4*1.8, 0, Math.sin(a)*1.4*1.8); });
+g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(c2), new THREE.LineBasicMaterial({ color: 0xffedd0, transparent: true, opacity: 0.24 })));
+build = () => g;

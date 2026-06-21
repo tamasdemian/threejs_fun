@@ -1,0 +1,16 @@
+const g = new THREE.Group();
+const R = params.R, r = params.r, vShift = params.vShift;
+const points2D = [[0,0],[1,2],[2,4],[3,6],[4,1],[5,3],[6,5]];
+const nodes = points2D.map(p => torusMap(p, 7, R, r, vShift));
+const torus = new THREE.Mesh(new THREE.TorusGeometry(R, r, 24, 80), new THREE.MeshBasicMaterial({ color: 0x2f6f84, wireframe: true }));
+g.add(torus);
+nodes.forEach(p => g.add(makeSphere(p, 0x9ae7ff, 0.14)));
+const tris = [[0,1,5],[0,4,5],[1,2,6],[1,5,6],[0,2,3],[0,2,6],[1,3,4],[0,1,3],[2,4,5],[1,2,4],[3,5,6],[2,3,5],[0,4,6],[3,4,6]];
+const facePos=[]; const faceCols=[];
+tris.forEach((tri,idx)=>{ const a=nodes[tri[0]], b=nodes[tri[1]], c=nodes[tri[2]]; facePos.push(a.x,a.y,a.z,b.x,b.y,b.z,c.x,c.y,c.z); const col=idx<7 ? 0x4a7a8f : 0x3d8f5f; for(let k=0;k<3;k++) faceCols.push((col>>16&255)/255,(col>>8&255)/255,(col&255)/255); });
+const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.Float32BufferAttribute(facePos,3)); fg.setAttribute('color', new THREE.Float32BufferAttribute(faceCols,3));
+g.add(new THREE.Mesh(fg, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, side: THREE.DoubleSide })));
+const edges=[]; for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++) edges.push(nodes[i].x,nodes[i].y,nodes[i].z,nodes[j].x,nodes[j].y,nodes[j].z);
+const eg = new THREE.BufferGeometry(); eg.setAttribute('position', new THREE.Float32BufferAttribute(edges,3)); g.add(new THREE.LineSegments(eg, new THREE.LineBasicMaterial({ color: 0xd9f7ff })));
+g.rotation.x = 1.0; g.rotation.z = 0.2;
+build = () => g;

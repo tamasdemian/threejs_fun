@@ -1,0 +1,11 @@
+const g = new THREE.Group();
+const R = params.R, r = params.r, vShift = params.vShift;
+const points2D = [[0,0],[1,2],[2,4],[3,6],[4,1],[5,3],[6,5]];
+const nodes = points2D.map(p => torusMap(p, 7, R, r, vShift));
+nodes.forEach(p => g.add(makeSphere(p, 0x9ae7ff, 0.14)));
+const triples = [[0,1,5],[0,2,4],[0,3,6],[1,2,6],[1,3,4],[2,3,5],[4,5,6]];
+const rainbow = [0xff4d4d,0xffa64d,0xffff4d,0x4dff4d,0x4dffff,0x4d7dff,0xb84dff];
+triples.forEach((tri, idx) => { const cyc = circlePointsFrom3Points(nodes[tri[0]], nodes[tri[1]], nodes[tri[2]], 128); if (cyc) g.add(lineLoop(cyc, rainbow[idx], 0.95)); });
+g.rotation.x = 1.0;
+g.rotation.z = 0.2;
+build = () => g;

@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Objects Viewer</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0f1115;color:#eef2f7;font-family:sans-serif}
+  #app{width:100%;height:100%;position:relative}
+  canvas{display:block;width:100%;height:100%}
+  .ui{position:absolute;top:16px;left:16px;z-index:10;padding:12px 14px;background:rgba(10,14,20,0.78);border:1px solid rgba(255,255,255,0.12);border-radius:12px;backdrop-filter:blur(8px);max-width:340px}
+  .ui h1{margin:0 0 8px;font-size:20px}
+  .ui p{margin:0 0 10px;font-size:14px;line-height:1.45;color:#c9d2de}
+  .ui label{display:block;margin-bottom:6px;font-size:12px;color:#9db0c8;text-transform:uppercase}
+  .ui select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.14);background:#141a22;color:#eef2f7;font:inherit;margin-bottom:12px}
+  .slider-group{margin-bottom:10px;display:none}
+  .slider-group label{display:flex;justify-content:space-between;margin-bottom:4px}
+  .slider-group input{width:100%;padding:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.14);background:#141a22;color:#eef2f7}
+  .hint{margin-top:10px;font-size:12px;color:#9db0c8}
+  #status{margin-top:10px;font-size:12px;color:#9ae7ff;word-break:break-word}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="ui">
+    <h1>3D objects viewer</h1>
+    <p>Select an object. The object definition is loaded from <code>3d_objects/</code>.</p>
+    <label for="objectSelect">Visible object</label>
+    <select id="objectSelect">
+      <option value="octahedron">Octahedron</option>
+      <option value="k33">K3,3</option>
+      <option value="k7">K7 on torus</option>
+      <option value="k7fano">K7Fano</option>
+    </select>
+    <div class="slider-group" id="rSliderGroup">
+      <label for="rSlider"><span>r (tube radius)</span><span id="rValue">1.0</span></label>
+      <input type="range" id="rSlider" min="0.3" max="1.5" step="0.1" value="1.0">
+    </div>
+    <div class="slider-group" id="RSliderGroup">
+      <label for="RSlider"><span>R (main radius)</span><span id="RValue">3.0</span></label>
+      <input type="range" id="RSlider" min="2" max="5" step="0.1" value="3.0">
+    </div>
+    <div class="slider-group" id="vShiftSliderGroup">
+      <label for="vShiftSlider"><span>V shift</span><span id="vShiftValue">0.0</span></label>
+      <input type="range" id="vShiftSlider" min="-3.14159" max="3.14159" step="0.1" value="0.0">
+    </div>
+    <div class="hint">Drag=rotate, wheel=zoom</div>
+    <div id="status">Ready</div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script>
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0f1115);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.getElementById('app').appendChild(renderer.domElement);
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+let radius = 10, theta = 0.7, phi = 1.1;
+const target = new THREE.Vector3(0, 0, 0);
+function updateCamera() {
+  phi = Math.max(0.12, Math.min(Math.PI - 0.12, phi));
+  radius = Math.max(3, Math.min(30, radius));
+  camera.position.set(
+    radius * Math.sin(phi) * Math.sin(theta),
+    radius * Math.cos(phi),
+    radius * Math.sin(phi) * Math.cos(theta)
+  );
+  camera.lookAt(target);
+}
+updateCamera();
+scene.add(new THREE.AmbientLight(0xffffff, 1.3));
+const dir1 = new THREE.DirectionalLight(0xffffff, 1.5); dir1.position.set(5, 8, 6); scene.add(dir1);
+const dir2 = new THREE.DirectionalLight(0x88ccff, 1.0); dir2.position.set(-5, -3, 4); scene.add(dir2);
+const grid = new THREE.GridHelper(20, 14, 0x2b4258, 0x1b2734); grid.position.y = -3; scene.add(grid);
+
+const objectSelect = document.getElementById('objectSelect');
+const rSliderGroup = document.getElementById('rSliderGroup');
+const RSliderGroup = document.getElementById('RSliderGroup');
+const vShiftSliderGroup = document.getElementById('vShiftSliderGroup');
+const rSlider = document.getElementById('rSlider');
+const RSlider = document.getElementById('RSlider');
+const vShiftSlider = document.getElementById('vShiftSlider');
+const rValue = document.getElementById('rValue');
+const RValue = document.getElementById('RValue');
+const vShiftValue = document.getElementById('vShiftValue');
+const status = document.getElementById('status');
+
+let currentObjectGroup = null;
+let currentName = null;
+let currentParams = { R: 3, r: 1, vShift: 0 };
+let currentDefinition = null;
+let isLoading = false;
+
+function clearCurrentObject() {
+  if (currentObjectGroup) {
+    scene.remove(currentObjectGroup);
+    currentObjectGroup.traverse(obj => {
+      if (obj.geometry) obj.geometry.dispose();
+      if (obj.material) {
+        if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose && m.dispose());
+        else if (obj.material.dispose) obj.material.dispose();
+      }
+    });
+    currentObjectGroup = null;
+  }
+}
+
+function setStatus(text) { status.textContent = text; }
+
+function makeSphere(pos, color, r=0.14) {
+  const m = new THREE.Mesh(
+    new THREE.SphereGeometry(r, 16, 16),
+    new THREE.MeshPhongMaterial({ color })
+  );
+  m.position.copy(pos);
+  return m;
+}
+
+function torusMap([u, v], n, R, r, Vshift) {
+  const U = (u / n) * Math.PI * 2;
+  const V = (v / n) * Math.PI * 2 + Vshift;
+  return new THREE.Vector3(
+    (R + r * Math.cos(V)) * Math.cos(U),
+    (R + r * Math.cos(V)) * Math.sin(U),
+    r * Math.sin(V)
+  );
+}
+
+function circleFrom3Points(p1, p2, p3) {
+  const a = p2.clone().sub(p1);
+  const b = p3.clone().sub(p1);
+  const axb = new THREE.Vector3().crossVectors(a, b);
+  const denom = 2 * axb.lengthSq();
+  if (denom < 1e-10) return null;
+  const a2 = a.lengthSq();
+  const b2 = b.lengthSq();
+  const term1 = new THREE.Vector3().crossVectors(axb, a).multiplyScalar(b2);
+  const term2 = new THREE.Vector3().crossVectors(b, axb).multiplyScalar(a2);
+  const center = p1.clone().add(term1.add(term2).divideScalar(denom));
+  const radius = center.distanceTo(p1);
+  const n = axb.clone().normalize();
+  const u = a.clone().normalize();
+  const v = new THREE.Vector3().crossVectors(n, u).normalize();
+  return { center, radius, normal: n, u, v };
+}
+
+function circlePointsFrom3Points(p1, p2, p3, segments=128) {
+  const c = circleFrom3Points(p1, p2, p3);
+  if (!c) return null;
+  const pts = [];
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments * Math.PI * 2;
+    pts.push(
+      c.center.clone()
+        .add(c.u.clone().multiplyScalar(Math.cos(t) * c.radius))
+        .add(c.v.clone().multiplyScalar(Math.sin(t) * c.radius))
+    );
+  }
+  return pts;
+}
+
+function lineLoop(points, color, opacity=1) {
+  const g = new THREE.BufferGeometry().setFromPoints(points);
+  const m = new THREE.LineBasicMaterial({ color, transparent: opacity < 1, opacity });
+  return new THREE.LineLoop(g, m);
+}
+
+async function loadObject(name, paramsOverride=null) {
+  if (isLoading) return;
+  isLoading = true;
+  setStatus('Loading ' + name + '...');
+  clearCurrentObject();
+  try {
+    const res = await fetch('./3d_objects/' + name + '.js', { cache: 'no-store' });
+    if (!res.ok) throw new Error('Failed to load ' + name + '.js (' + res.status + ')');
+    const code = await res.text();
+    currentDefinition = new Function(
+      'THREE','makeSphere','torusMap','circleFrom3Points','circlePointsFrom3Points','lineLoop','params',
+      code + '\nreturn build;'
+    );
+    const params = paramsOverride || currentParams;
+    const builder = currentDefinition(
+      THREE, makeSphere, torusMap, circleFrom3Points, circlePointsFrom3Points, lineLoop, params
+    );
+    currentObjectGroup = builder({
+      THREE, makeSphere, torusMap, circleFrom3Points, circlePointsFrom3Points, lineLoop, params
+    });
+    scene.add(currentObjectGroup);
+    currentName = name;
+    setStatus('Loaded: ' + name);
+  } catch (err) {
+    console.error(err);
+    setStatus('Error: ' + err.message);
+  } finally {
+    isLoading = false;
+  }
+}
+
+function rebuildCurrentObject() {
+  if (currentName !== 'k7' && currentName !== 'k7fano') return;
+  const params = {
+    R: parseFloat(RSlider.value),
+    r: parseFloat(rSlider.value),
+    vShift: parseFloat(vShiftSlider.value)
+  };
+  currentParams = params;
+  rValue.textContent = params.r.toFixed(1);
+  RValue.textContent = params.R.toFixed(1);
+  vShiftValue.textContent = params.vShift.toFixed(2);
+  clearCurrentObject();
+  const builder = currentDefinition(
+    THREE, makeSphere, torusMap, circleFrom3Points, circlePointsFrom3Points, lineLoop, params
+  );
+  currentObjectGroup = builder({
+    THREE, makeSphere, torusMap, circleFrom3Points, circlePointsFrom3Points, lineLoop, params
+  });
+  scene.add(currentObjectGroup);
+  setStatus('Loaded: ' + currentName);
+}
+
+function updateUIForSelection(name) {
+  const showSliders = name === 'k7' || name === 'k7fano';
+  rSliderGroup.style.display = showSliders ? 'block' : 'none';
+  RSliderGroup.style.display = showSliders ? 'block' : 'none';
+  vShiftSliderGroup.style.display = showSliders ? 'block' : 'none';
+  radius = showSliders ? 12 : 10;
+  updateCamera();
+}
+
+objectSelect.addEventListener('change', () => {
+  updateUIForSelection(objectSelect.value);
+  loadObject(objectSelect.value);
+});
+rSlider.addEventListener('input', rebuildCurrentObject);
+RSlider.addEventListener('input', rebuildCurrentObject);
+vShiftSlider.addEventListener('input', rebuildCurrentObject);
+
+let dragging = false, lastX = 0, lastY = 0;
+renderer.domElement.addEventListener('pointerdown', e => {
+  dragging = true;
+  lastX = e.clientX;
+  lastY = e.clientY;
+  renderer.domElement.setPointerCapture(e.pointerId);
+});
+renderer.domElement.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  theta -= (e.clientX - lastX) * 0.008;
+  phi -= (e.clientY - lastY) * 0.008;
+  lastX = e.clientX;
+  lastY = e.clientY;
+  updateCamera();
+});
+const stopDrag = e => {
+  dragging = false;
+  try { renderer.domElement.releasePointerCapture(e.pointerId); } catch {}
+};
+renderer.domElement.addEventListener('pointerup', stopDrag);
+renderer.domElement.addEventListener('pointerleave', stopDrag);
+renderer.domElement.addEventListener('wheel', e => {
+  e.preventDefault();
+  radius += e.deltaY * 0.004;
+  updateCamera();
+}, { passive: false });
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+objectSelect.value = 'octahedron';
+updateUIForSelection('octahedron');
+loadObject('octahedron');
+
+(function animate() {
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
