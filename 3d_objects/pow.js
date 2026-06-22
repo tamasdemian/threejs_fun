@@ -9,12 +9,8 @@ function realPow(x, y) {
 
   let z = Math.abs(Math.pow(ax, y));
 
-  //if (x < 0 && Math.abs(y - Math.round(y)) < 1e-9 && (Math.round(y) % 2 !== 0)) {
-  //  z = -z;
-  //}
-
   // clamp to keep geometry visible
-  return THREE.MathUtils.clamp(z, -20, 20);
+  return THREE.MathUtils.clamp(z, -1, 8);
 }
 
 function zToColor(z, zMin, zMax) {
@@ -105,9 +101,9 @@ function lineFromPoints(points, color) {
 
 // --------------------------------------------------------------------auxiliary lines
 const n = 300;
-const eps = 1e-6;
+const eps = 1e-6; // to prevent z-fighting
 
-const xmi = xmin - 0.6, xma = xmax + 0.6, ymi = ymin - 0.6, yma = ymax + 0.6; // for lines
+const xmi = xmin - 0.6, xma = xmax + 0.6, ymi = ymin - 0.6, yma = ymax + 0.6;
 const l1 = []; // -----------------------------------------------------line: (x=0,z=0)
 for (let i = 0; i <= n; i++) {
   const y = ymi + (yma - ymi) * (i / n);
