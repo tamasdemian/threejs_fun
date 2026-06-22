@@ -98,8 +98,8 @@ Structure of the periodic table can explained using quantum numbers:
 - magnetic quantum number: `m_l: -l ... l`
 - spin magnetic quantum number: `m_s: ±1/2`
 
-Mendeleev was not aware of all the quantum numbers but his system effectively flattened this 4D structure to a planar table: `x:{l,m_l,m_s}, y:n`
-More precisely, `x=(m_s+1/2) + 2m_l + 2l^2` with some rearrangements.
+Mendeleev was not aware of all the quantum numbers but his system effectively flattened this 4D structure to a planar table: `x:{l,m_l,m_s}, y:n`.
+(More precisely, `x=(m_s+1/2) + 2m_l + 2l^2` with some rearrangements.)
 
 ThreeJS allows a more structure-preserving mapping: `x:{l,m_s}, y:n, z:m_l`. More precisely, `x=m_s>0?l+0.5:-1*(l+0.5)` without any rearrangement.
 Logicaly, `m_s` is closer to `m_l`, none of them has contibutions to the energy of the electron unlike `n` and `l`. 
@@ -107,7 +107,7 @@ However, `m_l` can be negative so attaching the spin number would look ugly.
 Atoms with net spin = 0 are totally separated in this 3D structure reflecting their magnetic properties.
 
 ![pertbl](images/periodic_table.png "Periodic")
-Only 12 element is "invisible" in this layout in the p and d-blocks.
+Only 20 element is "invisible" in this layout in the p and d-blocks.
 
 TODO labels and pull request to [this demo](https://threejs.org/examples/?q=perio#css3d_periodictable)
 
@@ -123,7 +123,7 @@ Structure of the IPA can be described quite well using 4 binary coordinates and 
 - location of blocking the airflow (velar, alveolar, labial, ...)
 
 These dimensions form the skeleton of consonants. Unfortunately, I have no clue about the vocal value of many IPA symbols, so I can classify only its subset in this space.
-In addition, linguists don't exploit 3D to describe this multidimensional space. So, I wanted to tune up the (subset of) cannonical IPA.
+In addition, linguists don't exploit 3D to describe this multidimensional space. So, I wanted to tune up the [cannonical IPA diagram](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet).
 'H' has no location since there is no relevant blocking, so 'H' is the origin for each location. Beside this, I don't want to map nodes to the same place if they differ only in location (linear projection). That's why I use a projective projection from this 5D space to 3D, where the line of 'H' is mapped to a single node.
 
 TODO graph, labels
