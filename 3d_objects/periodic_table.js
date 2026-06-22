@@ -1,72 +1,6 @@
 const g = new THREE.Group();
 
-// quantum numbers: outermost valence electron in ground state. 
-// (Aufbau principle refined by Madelung rule + Hund's rule)
-atoms = [
-  {"Z": 1, "symbol": "H", "name": "Hydrogen", "ground_state": "1s1",
-   "outer_electron": {"n": 1, "l": 0, "ml": 0, "ms": 0.5}},
-
-  {"Z": 2, "symbol": "He", "name": "Helium", "ground_state": "1s2",
-   "outer_electron": {"n": 1, "l": 0, "ml": 0, "ms": -0.5}},
-
-  {"Z": 3, "symbol": "Li", "name": "Lithium", "ground_state": "1s2 2s1",
-   "outer_electron": {"n": 2, "l": 0, "ml": 0, "ms": 0.5}},
-
-  {"Z": 4, "symbol": "Be", "name": "Beryllium", "ground_state": "1s2 2s2",
-   "outer_electron": {"n": 2, "l": 0, "ml": 0, "ms": -0.5}},
-
-  {"Z": 5, "symbol": "B", "name": "Boron", "ground_state": "1s2 2s2 2p1",
-   "outer_electron": {"n": 2, "l": 1, "ml": -1, "ms": 0.5}},
-
-  {"Z": 6, "symbol": "C", "name": "Carbon", "ground_state": "1s2 2s2 2p2",
-   "outer_electron": {"n": 2, "l": 1, "ml": 0, "ms": 0.5}},
-
-  {"Z": 7, "symbol": "N", "name": "Nitrogen", "ground_state": "1s2 2s2 2p3",
-   "outer_electron": {"n": 2, "l": 1, "ml": 1, "ms": 0.5}},
-
-  {"Z": 8, "symbol": "O", "name": "Oxygen", "ground_state": "1s2 2s2 2p4",
-   "outer_electron": {"n": 2, "l": 1, "ml": -1, "ms": -0.5}},
-
-  {"Z": 9, "symbol": "F", "name": "Fluorine", "ground_state": "1s2 2s2 2p5",
-   "outer_electron": {"n": 2, "l": 1, "ml": 0, "ms": -0.5}},
-
-  {"Z": 10, "symbol": "Ne", "name": "Neon", "ground_state": "1s2 2s2 2p6",
-   "outer_electron": {"n": 2, "l": 1, "ml": 1, "ms": -0.5}},
-
-  {"Z": 11, "symbol": "Na", "name": "Sodium", "ground_state": "1s2 2s2 2p6 3s1",
-   "outer_electron": {"n": 3, "l": 0, "ml": 0, "ms": 0.5}},
-
-  {"Z": 12, "symbol": "Mg", "name": "Magnesium", "ground_state": "1s2 2s2 2p6 3s2",
-   "outer_electron": {"n": 3, "l": 0, "ml": 0, "ms": -0.5}},
-
-  {"Z": 13, "symbol": "Al", "name": "Aluminium", "ground_state": "1s2 2s2 2p6 3s2 3p1",
-   "outer_electron": {"n": 3, "l": 1, "ml": -1, "ms": 0.5}},
-
-  {"Z": 14, "symbol": "Si", "name": "Silicon", "ground_state": "1s2 2s2 2p6 3s2 3p2",
-   "outer_electron": {"n": 3, "l": 1, "ml": 0, "ms": 0.5}},
-
-  {"Z": 15, "symbol": "P", "name": "Phosphorus", "ground_state": "1s2 2s2 2p6 3s2 3p3",
-   "outer_electron": {"n": 3, "l": 1, "ml": 1, "ms": 0.5}},
-
-  {"Z": 16, "symbol": "S", "name": "Sulfur", "ground_state": "1s2 2s2 2p6 3s2 3p4",
-   "outer_electron": {"n": 3, "l": 1, "ml": -1, "ms": -0.5}},
-
-  {"Z": 17, "symbol": "Cl", "name": "Chlorine", "ground_state": "1s2 2s2 2p6 3s2 3p5",
-   "outer_electron": {"n": 3, "l": 1, "ml": 0, "ms": -0.5}},
-
-  {"Z": 18, "symbol": "Ar", "name": "Argon", "ground_state": "1s2 2s2 2p6 3s2 3p6",
-   "outer_electron": {"n": 3, "l": 1, "ml": 1, "ms": -0.5}},
-
-  {"Z": 19, "symbol": "K", "name": "Potassium", "ground_state": "1s2 2s2 2p6 3s2 3p6 4s1",
-   "outer_electron": {"n": 4, "l": 0, "ml": 0, "ms": 0.5}},
-
-  {"Z": 20, "symbol": "Ca", "name": "Calcium", "ground_state": "1s2 2s2 2p6 3s2 3p6 4s2",
-   "outer_electron": {"n": 4, "l": 0, "ml": 0, "ms": -0.5}}
-];
-
-console.log("buzi");
-console.log(atoms);
-
+/*
 function calculateAtomicNumber(n, l, ml, ms) {
   const innerElectrons = (n * (n - 1) * (2 * n - 1)) / 3;
   const subshellElectrons = 2 * l * l;
@@ -80,38 +14,17 @@ function calculateAtomicNumber(n, l, ml, ms) {
 
 //const Z_example = calculateAtomicNumber(3, 1, 0, 0.5);
 
+*/
+
 function col(l) {
     if(l == 0) return 0xffccbb; // s-block
     if(l == 1) return 0xfdff8c; // p-block
     if(l == 2) return 0xd9eff5; // d-block
     if(l == 3) return 0xaaffad; // f-block
-    if(l >= 4) return 0xff0000; // don't touch it!
+    if(l >= 4) return 0xff0000; // g-block hypothethic
 };
 
-/*
-for (let n = 1; n < 9; n++) {
-    for (let l = 0; l < n; l++) {
-        for (let ml = -l; ml <= l; ml++) {
-            for (let i = 0; i < 2; i++) {
-                ms = i - 0.5;
-                Z = calculateAtomicNumber(n,l,ml,ms);
-                x = ms > 0 ? l + 0.5 : -1 * (l + 0.5);
-                if(Z < 118){
-                    g.add(makeSphere(new THREE.Vector3(x, n - 3, ml), col(l), 0.16));
-                    if (Z < 21){                    
-                        atom = atoms[Z - 1];
-                        consistent = (atom['Z'] == Z) && (atom['outer_electron'] == {"n": n, "l": l, "ml": ml, "ms": ms});
-                        if(not consistent){
-                            console.log(atom, Z, {"n": n, "l": l, "ml": ml, "ms": ms})
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-*/
-
+// based on Madelung rule and Hund's rule
 function getElectronData(Z) {
     if (Z < 1 || Z > 118) throw new Error("Z must be between 1 and 118");
 
@@ -197,21 +110,11 @@ function determineLastElectronQNs(n, l, count) {
     };
 }
 
-
-/*
-const Z = 15; // Phosphorus
-const result = getElectronData(Z);
-console.log(`Element Z=${Z}`);
-console.log(`Configuration: ${result.configuration}`);
-console.log(`Last Electron QNs: n=${result.lastElectron.n}, l=${result.lastElectron.l}, ml=${result.lastElectron.ml}, ms=${result.lastElectron.ms}`);
-*/
-
-for (let Z = 1; Z < 119; Z++) {
+for (let Z = 1; Z <= 118; Z++) {
     const {n, l, ml, ms, orbitalLabel} = getElectronData(Z).lastElectron;
     x = ms > 0 ? l + 0.5 : -1 * (l + 0.5);
     g.add(makeSphere(new THREE.Vector3(x, n - 3, ml), col(l), 0.16));
 } 
-
 
 
 //g.rotation.x = Math.PI / -2;
