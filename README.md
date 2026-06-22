@@ -4,10 +4,19 @@ This repo is not about demonstrating coding skills. I generated these files main
 I would like to share the joy of visualizing some complex concepts with this nice 3D js lib: [ThreeJS](https://threejs.org/examples).
 Feedback is welcome at demiantamas[at] gmail [dot] com.
 
-## run server:
-`python3 -m http.server 8000`
+## Deployed URL
 
-## url:
+https://tamasdemian.github.io/threejs_fun/
+
+## Run Local Server
+
+Get your copy, start a webserver:
+``` bash
+git clone git@github.com:tamasdemian/threejs_fun.git
+cd threejs_fun
+python3 -m http.server 8000 # or run any other webserver
+```
+then visit this URL:
 `http://localhost:8000/index.html`
 
 # Content
@@ -28,10 +37,9 @@ Order may reach 72 (maximal) in 4D...
 K4 is like tetrahedron but you can't map K5 or K6 to a polyhedron. 
 How about K7? (Császár polyhedron)
 
-
 TODO check faces and winding
 
-## K7 - Fano plane
+## K7 - Fano Plane
 
 The Fano plane is the smallest possible finite projective plane.
 - Every line contains exactly 3 points. 
@@ -52,10 +60,9 @@ Surface contains seven lines which intersect each other in 7 points. (not Fano p
 
 (The surface at (x=0,y=0) is not accurate due to the poor resolution.)
 
-
 Challenge: find the parabola and the natural logarithm function. 
 
-## The simplest hyperstatic 2D and 3D systems
+## The Simplest Hyperstatic 2D and 3D Systems
 
 Simplest in this sense:
 - minmal number of nodes where 
@@ -81,17 +88,45 @@ Order=60 raises the question: why don't we build a minute counter from an icosah
 Answer: these groups are not cyclic. We can not rotate it around a single axis to visit all the group elements.
 2 axes are enough, however. Finding a 'simple' Hamiltonian circle was a smaller challenge here.
 
-
 TODO add labels and program
 
-## Periodic table
+## Periodic Table
 
-How would it look like if we wouldnt flatten the quantum numbers?
-- Mendeleev: `x:{l,m_l,m_s}, y:n`
-- threejs allows this : `x:l, y:n, z:m_l,m_s`
+Structure of the periodic table can explained using quantum numbers:
+- principal quantum number: `n: 1 .. 7`
+- orbital angular momentum quantum number: `l: 0 ... n-1`
+- magnetic quantum number: `m_l: -l ... l`
+- spin magnetic quantum number: `m_s: ±1/2`
 
+Mendeleev was not aware of all the quantum numbers but his system effectively flattened this 4D structure to a planar table: `x:{l,m_l,m_s}, y:n`
+More precisely, `x=(m_s+1/2) + 2m_l + 2l^2` with some rearrangements.
 
-TODO pull request to []this demo](https://threejs.org/examples/?q=perio#css3d_periodictable)
+ThreeJS allows a more structure-preserving mapping: `x:{l,m_s}, y:n, z:m_l`. More precisely, `x=m_s>0?l+0.5:-1*(l+0.5)` without any rearrangement.
+Logicaly, `m_s` is closer to `m_l`, none of them has contibutions to the energy of the electron unlike `n` and `l`. 
+However, `m_l` can be negative so attaching the spin number would look ugly.
+Atoms with net spin = 0 are totally separated in this 3D structure reflecting their magnetic properties.
+
+![pertbl](images/periodic_table.png "Periodic")
+Only 12 element is "invisible" in this layout in the p and d-blocks.
+
+TODO labels and pull request to [this demo](https://threejs.org/examples/?q=perio#css3d_periodictable)
+
+## Pulmonic Consonants of International Phonetic Alphabet
+
+We create pulmonic consonants with complete or partial closure of our vocal tract blocking the airflow.
+
+Structure of the IPA can be described quite well using 4 binary coordinates and location:
+- plosive? (spectrally broad, temporally narrow, sudden release of obstacle)
+- voiced? (spectrally narrow, temporally broad, resonance of vocal cord)
+- fricative? (turbulence in mouth region)
+- palatal? (location: roof of mouth but can be combined independently with other traits)
+- location of blocking the airflow (velar, alveolar, labial, ...)
+
+These dimensions form the skeleton of consonants. Unfortunately, I have no clue about the vocal value of many IPA symbols, so I can classify only its subset in this space.
+In addition, linguists don't exploit 3D to describe this multidimensional space. So, I wanted to tune up the (subset of) cannonical IPA.
+'H' has no location since there is no relevant blocking, so 'H' is the origin for each location. Beside this, I don't want to map nodes to the same place if they differ only in location (linear projection). That's why I use a projective projection from this 5D space to 3D, where the line of 'H' is mapped to a single node.
+
+TODO graph, labels
 
 ## Visualization of the Lie Algebra of SO(3)
 
