@@ -26,12 +26,6 @@ then visit this URL:
 It is the only regular polyhedron with even vertex degree. Nnumber of faces meeting at each vertex = 4.
 I will show later its unique relation to identities. Now it is just the helloworld example.
 
-## K3,3
-
-The richest automorphism group of 2D (planar) embeddings of the (non-planar) `K3,3` graph is the hexagonal dihedral group with order of 12.
-I asked the AI to generate the most symmetric 3D embedding. I got this. :) Order = 4 only. Triangular prism would have been simpler and better.
-Order may reach 72 (maximal) in 4D...
-
 ## K7
 
 K4 is like tetrahedron but you can't map K5 or K6 to a polyhedron. 
@@ -102,9 +96,10 @@ Mendeleev was not aware of all the quantum numbers but his system effectively fl
 (More precisely, `x=(m_s+1/2) + 2m_l + 2l^2` with some rearrangements.)
 
 ThreeJS allows a more structure-preserving mapping: `x:{l,m_s}, y:n, z:m_l`. More precisely, `x=m_s>0?l+0.5:-1*(l+0.5)` without any rearrangement.
-Logicaly, `m_s` is closer to `m_l`, none of them has contibutions to the energy of the electron unlike `n` and `l`. 
+Logicaly, `m_s` is closer to `m_l`, none of them has significant energy contibutions unlike `n` and `l`. 
 However, `m_l` can be negative so attaching the spin number would look ugly.
 Atoms with net spin = 0 are totally separated in this 3D structure reflecting their magnetic properties.
+(I have also applied a `z=m_s>0?-m_l:m_l=-2*m_s*m_l` mapping in the final layout to make it more similar to the periodic table. Another advantage: this `z` is closely related to total spin `=(z+|z|)/2`.)
 
 ![electronconfigspace](images/electron_configurations.png "The Electron Configuration Space")
 Only 20 element is "invisible" in this layout in the p and d-blocks. This electron configuration space doesn't seem periodic at all.
@@ -113,7 +108,10 @@ From an appropriate angle you can see how the Madelung rule controls the shape o
 
 [Madelung rule](https://en.wikipedia.org/wiki/Electron_configuration#Atoms:_Aufbau_principle_and_Madelung_rule) and [Hund's rule](https://en.wikipedia.org/wiki/Hund%27s_rule_of_maximum_multiplicity) describe the filling order of atomic orbitals. Basically, the orbital energy depends on `n` and `l` (covered by Madelung rule) but electron-electron repulsion slightly increases energy if they occupy the same orbital with opposite spin. Atoms with maximal total electronic spin can also be easily localized in this layout.
 
-TODO labels and pull request to [this demo](https://threejs.org/examples/?q=perio#css3d_periodictable)
+Challenge: Do you know why Zn is not as stable chemically as noble gasses (closed p subshell) even if it has a closed d subshell? (Zn: [Ar] 4s² 3d¹⁰)
+Answer: Primarily the outermost electrons determine the chemical properties of an atom. These are 4s² (maximal `n=4`), so Zn is chemically similar to Ca.
+
+TODO 3D labels and pull request to [this demo](https://threejs.org/examples/?q=perio#css3d_periodictable)
 
 ## Pulmonic Consonants of International Phonetic Alphabet
 

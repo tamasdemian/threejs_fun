@@ -18,6 +18,13 @@
   .slider-group input{width:100%;padding:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.14);background:#141a22;color:#eef2f7}
   .hint{margin-top:10px;font-size:12px;color:#9db0c8}
   #status{margin-top:10px;font-size:12px;color:#9ae7ff;word-break:break-word}
+
+  .label {
+      color: red;
+      font-size: 12px;
+      font-family: sans-serif;
+      white-space: nowrap;
+  }
 </style>
 </head>
 <body>
@@ -28,7 +35,6 @@
     <label for="objectSelect">Visible object</label>
     <select id="objectSelect">
       <option value="octahedron">Octahedron</option>
-      <option value="k33">K3,3</option>
       <option value="k7">K7 on Torus</option>
       <option value="k7fano">K7Fano</option>
       <option value="pow">Exponentiation</option>
@@ -53,14 +59,45 @@
     <div id="status">Ready</div>
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-<script>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+// old deprecated: examples/js/*
+// new           : examples/jsm/*
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0f1115);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('app').appendChild(renderer.domElement);
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize( window.innerWidth, window.innerHeight );
+labelRenderer.domElement.style.position = 'absolute';
+labelRenderer.domElement.style.top = '0px';
+labelRenderer.domElement.style.left = '0px';
+labelRenderer.domElement.style.pointerEvents = 'none';
+document.body.appendChild( labelRenderer.domElement );
+
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
 let radius = 10, theta = 0.7, phi = 1.1;
 const target = new THREE.Vector3(0, 0, 0);
@@ -98,28 +135,48 @@ let currentParams = { R: 3, r: 1, vShift: 0 };
 let currentDefinition = null;
 let isLoading = false;
 
+
 function clearCurrentObject() {
-  if (currentObjectGroup) {
-    scene.remove(currentObjectGroup);
-    currentObjectGroup.traverse(obj => {
-      if (obj.geometry) obj.geometry.dispose();
-      if (obj.material) {
-        if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose && m.dispose());
-        else if (obj.material.dispose) obj.material.dispose();
+  if (!currentObjectGroup) return;
+  scene.remove(currentObjectGroup);
+  currentObjectGroup.traverse(obj => {
+    // dispose geometry
+    if (obj.geometry) obj.geometry.dispose();
+    // dispose material
+    if (obj.material) {
+      if (Array.isArray(obj.material)) {
+        obj.material.forEach(m => m.dispose());
+      } else {
+        obj.material.dispose();
       }
-    });
-    currentObjectGroup = null;
-  }
+    }
+    // remove CSS2D DOM elements
+    if (obj.element && obj.element.parentNode) {
+      obj.element.remove();
+    }
+  });
+  currentObjectGroup = null;
 }
 
 function setStatus(text) { status.textContent = text; }
 
-function makeSphere(pos, color, r=0.14) {
+function makeSphere(pos, color, r = 0.14, label = "") {
   const m = new THREE.Mesh(
     new THREE.SphereGeometry(r, 16, 16),
     new THREE.MeshPhongMaterial({ color })
   );
   m.position.copy(pos);
+
+  if(label){
+    const div = document.createElement( 'div' );
+    div.className = 'label';
+    div.textContent = label;
+    div.style.backgroundColor = 'transparent';
+    const lbl = new CSS2DObject( div );
+    lbl.position.set( 0, 0, 0 );
+    m.add( lbl );
+  }
+
   return m;
 }
 
@@ -281,6 +338,7 @@ loadObject('octahedron');
 
 (function animate() {
   renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
   requestAnimationFrame(animate);
 })();
 </script>

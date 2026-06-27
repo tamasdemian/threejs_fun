@@ -34,7 +34,7 @@ function getElectronData(Z) {
     for (let n = 1; n <= 7; n++) {
         for (let l = 0; l < n; l++) {
             // Limit l based on known blocks (s,p,d,f) for standard periodic table
-            if (l > 3) continue; 
+            if (l > 3) continue;
             orbitals.push({ n, l, sum: n + l });
         }
     }
@@ -110,11 +110,18 @@ function determineLastElectronQNs(n, l, count) {
     };
 }
 
-for (let Z = 1; Z <= 118; Z++) {
-    const {n, l, ml, ms, orbitalLabel} = getElectronData(Z).lastElectron;
-    x = ms > 0 ? l + 0.5 : -1 * (l + 0.5);
-    g.add(makeSphere(new THREE.Vector3(x, n - 3, ml), col(l), 0.16));
-} 
+
+fetch("./data/atoms.json")
+  .then(res => res.json())
+  .then(data => {
+        for (let Z = 1; Z <= 118; Z++) {
+            const {n, l, ml, ms, orbitalLabel} = getElectronData(Z).lastElectron;
+            x = ms > 0 ? l + 0.5 : -1 * (l + 0.5);
+            z = ms > 0 ? -ml : ml
+            d = data[Z-1]
+            g.add(makeSphere(new THREE.Vector3(x, n - 3, z), col(l), 0.16, d.symbol + " " + (Z)));
+        } 
+  });
 
 
 //g.rotation.x = Math.PI / -2;

@@ -96,9 +96,6 @@ function lineFromPoints(points, color) {
   );
 }
 
-
-
-
 // --------------------------------------------------------------------auxiliary lines
 const n = 300;
 const eps = 1e-6; // to prevent z-fighting
@@ -153,9 +150,8 @@ for (let i = 0; i <= n; i++) {
 }
 g.add(lineFromPoints(l7, 0x00ffcc));
 
-
 // -------------------------------------------------------------------intersections of lines
-g.add(makeSphere(new THREE.Vector3(eps, 0, 0), 0xffffff, 0.06)); // origin
+g.add(makeSphere(new THREE.Vector3(eps, 0, 0), 0xffffff, 0.06, label = "origin")); // origin
 g.add(makeSphere(new THREE.Vector3(0, 0, 1), 0x0000ff, 0.06));
 g.add(makeSphere(new THREE.Vector3(0, 1, 0), 0x0000ff, 0.06));
 g.add(makeSphere(new THREE.Vector3(1, 0, 1), 0x00ff00, 0.06));
